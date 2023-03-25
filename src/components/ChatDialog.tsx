@@ -7,17 +7,18 @@ type ChatDialogProp = {
  const ChatDialog: React.FC<ChatDialogProp> = ({ item }: ChatDialogProp) => {
     return (
     <>
+
      {item.role === "assistant" ? (
-      <div className='chat chat-end'>
+      <div className='chat chat-end mb-5'>
           <div className='chat-bubble chat-bubble-secondary'>
-              <strong className='badge badge primary'>{CHATBOT_NAME}</strong>
+              <strong className='badge badge primary mb-1'>{CHATBOT_NAME}</strong>
               <br />
               {item.content}
           </div>
         </div>) : 
-            (<div className='chat chat-start'>
+            (<div className='chat chat-start mb-5'>
             <div className='chat-bubble chat-bubble-primary'>
-                <strong className='badge badge primary'>{USER_NAME}</strong>
+                <strong className='badge badge primary mb-1'>{USER_NAME}</strong>
                 <br />
                 {item.content}
             </div>

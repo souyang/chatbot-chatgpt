@@ -7,7 +7,7 @@ import React, { ChangeEvent, Fragment, KeyboardEvent, useCallback, useRef, useSt
 export default function Home() {
   const [inputValue, setInputVaule] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const conversationListRef = useRef<ChatCompletionRequestMessage[]>(INITIAL_CONVERSATION);
+  const [conversationList, setConverstationList] = useState<ChatCompletionRequestMessage[]>([]);
   const handleInput = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       setInputVaule(e.target.value)
@@ -17,8 +17,7 @@ export default function Home() {
   const handleKeyDown = async (e: KeyboardEvent<HTMLInputElement>) => { 
       
       if (e.key === "Enter") {
-        const chatHistory = [...conversationListRef.current, {role: "user", content: inputValue}]
-        conversationListRef.current = [...conversationListRef.current, {role: "user", content: inputValue}];
+        const chatHistory: ChatCompletionRequestMessage[] = [...conversationList, {role: "user", content: inputValue}]
         const response = await fetch("/api/openAIChat", {
           method: "POST",
           headers: {
@@ -29,12 +28,12 @@ export default function Home() {
 
         const data = await response.json()
         setInputVaule("")
-        conversationListRef.current = [...conversationListRef.current, {role: "assistant", content: data.result}];
+        setConverstationList([...chatHistory, {role: "assistant", content: data.result}]);
       }
   }
   const handleRefresh = () => {
-    conversationListRef.current = [];
-    console.log('conversationListRef', conversationListRef);
+    setConverstationList([])
+    console.log('conversationList', conversationList);
     inputRef.current?.focus();
     setInputVaule("");
     
@@ -62,10 +61,12 @@ export default function Home() {
           <button className="btn btn-primary mt-5 mb-5" onClick={handleRefresh}>new converation</button>
       </div>
     </div>
-    <div className="textarea">
-       {conversationListRef.current.map((item, index) => ( <Fragment key={index}>
-       <ChatDialog item = {item}></ChatDialog>
-       </Fragment>))}
+    <div className="w-1/2 ml-auto mr-auto">
+       <div className="textarea">
+        {conversationList.map((item, index) => ( <Fragment key={index}>
+        <ChatDialog item = {item}></ChatDialog>
+        </Fragment>))}
+       </div>
     </div>
   </div>
   )
