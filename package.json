@@ -10,12 +10,6 @@
     "prettier": "npx prettier --write .",
     "prepare": "husky install"
   },
-  "lint-staged": {
-    "**/*.{ts,tsx}": [
-      "eslint . --fix",
-      "prettier --write ."
-    ]
-  },
   "dependencies": {
     "@types/node": "18.15.9",
     "@types/react": "18.0.29",
