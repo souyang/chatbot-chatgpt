@@ -13,9 +13,11 @@ export default async function handler(
     res: NextApiResponse,
 ) {
     const messages: ChatCompletionRequestMessage[] = req.body.message
+    console.log('messages', messages)
     const completion = await openai.createChatCompletion({
         model: 'gpt-3.5-turbo',
         messages: messages
     });
+    console.log("data", completion.data);
     res.status(200).json({ result: completion.data.choices[0].message?.content })
 }
