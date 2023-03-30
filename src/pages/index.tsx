@@ -16,8 +16,8 @@ export default function Home() {
   const [hintDialog, setHintDialog] = useState("");
   const [showLoader, setShowLoader] = useState(false);
   const [copyText, setCopyText] = useState("copy");
-  const [conversationCopyText, setConverationCopyText] = useState("copy");
-  const aiText = conversationList.length > 2 ? conversationList[2].content : ""
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isFirstConveration, setIsFirstConversation] = useState(false)
   const handleInput = useCallback(
     (e: ChangeEvent<HTMLTextAreaElement>) => {
       setInputVaule(e.target.value)
@@ -31,18 +31,23 @@ export default function Home() {
   const handleRoleSelect = useCallback(
      (e: ChangeEvent<HTMLSelectElement>) => {
      setCurrentRole(e.target.value)
+     setConverstationList([]);
+     setInputVaule('');
+     setIsFirstConversation(true)
+     inputRef.current?.focus()
      const context = roles.find((role) => {return role.id === e.target.value})?.context || ""
      const hintDialog = roles.find((role) => {return role.id === e.target.value})?.hintDialog || ""
      setRoleContext(context)
      setHintDialog(hintDialog)
      setCopyText("copy")
-     setConverstationList([{role: "user", content: context}])
+     setIsFirstConversation(true)
+     //setConverstationList([{role: "user", content: context}])
     },
     [],
   )
   const generateReply = async () => { 
-        const chatHistory: ChatCompletionRequestMessage[] = [...conversationList, {role: "user", content: inputValue}]
-        console.log('chatHistory', chatHistory);
+        let chatHistory: ChatCompletionRequestMessage[] = [...conversationList, {role: "user", content: isFirstConveration ? roleContext + ' ' + inputValue : inputValue}]
+        //console.log('chatHistory', chatHistory);
         setShowLoader(true);
         const response = await fetch("/api/openAIChat", {
           method: "POST",
@@ -51,13 +56,23 @@ export default function Home() {
             },
           body: JSON.stringify({ message: chatHistory}),
         })
-        const data = await response.json()
         setShowLoader(false);
-        setInputVaule("")
-        setConverstationList([...chatHistory, {role: "assistant", content: data.result}]);
+        if (response.status === 200) {
+          setErrorMessage("")
+          setIsFirstConversation(false);
+          const data = await response.json()
+          //setInputVaule("")
+          chatHistory = [{role: "user", content: inputValue}, ...chatHistory.slice(1)]
+          setConverstationList([...chatHistory, {role: "assistant", content: data.result}]);
+        } else {
+          const data = await response.json();
+          console.log('data', data);
+          setErrorMessage(data.result);
+        }
   }
   const handleRefresh = () => {
     setConverstationList([])
+    setIsFirstConversation(true)
     inputRef.current?.focus()
     setInputVaule("")
     setCurrentRole("")
@@ -66,6 +81,7 @@ export default function Home() {
   const resetConverationwithExistingRole = () => {
     inputRef.current?.focus()
     setInputVaule("")
+    setIsFirstConversation(true)
     setConverstationList([{role: "user", content: roleContext}])
   }
 
@@ -126,14 +142,22 @@ export default function Home() {
       </div>
     </div>
     <div className= {currentRole ? 'max-w-md ml-auto mr-auto' : 'hidden'}>
-       <div className={showLoader ? "hidden" : "textarea"}>
+    <div className={!showLoader && errorMessage ? "textarea"  : "hidden" }>
+      <div className="alert alert-error shadow-lg">
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <span>Error! Task failed successfully.</span>
+        </div>
+    </div>
+      </div>
+       <div className={!showLoader ? "textarea" : "hidden"}>
         {
-          conversationList.length <= 2? [] : conversationList.slice(1).map((item, index) => ( <Fragment key={index}>
+          conversationList.map((item, index) => ( <Fragment key={index}>
           <ChatDialog item = {item}></ChatDialog>
           </Fragment>))
         }
        </div>
-       <div className={!showLoader ? "hidden" : "flex items-center justify-center space-x-2"}>
+       <div className={!showLoader ? "hidden" : "flex items-center justify-center space-x-2 mb-10"}>
        <div
     className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
     role="status">
