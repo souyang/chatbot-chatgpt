@@ -27,7 +27,6 @@ export default function Home() {
   const resetUserMessage = () => {
     inputRef.current?.focus();
     setInputVaule("");
-    setConverstationList([{role: "user", content: roleContext}])
   }
   const handleRoleSelect = useCallback(
      (e: ChangeEvent<HTMLSelectElement>) => {
@@ -62,6 +61,12 @@ export default function Home() {
     inputRef.current?.focus()
     setInputVaule("")
     setCurrentRole("")
+  }
+
+  const resetConverationwithExistingRole = () => {
+    inputRef.current?.focus()
+    setInputVaule("")
+    setConverstationList([{role: "user", content: roleContext}])
   }
 
   const handleCopyText = () => {
@@ -103,29 +108,27 @@ export default function Home() {
             />
           </div>
            <div className="flex flex-col md:flex-row mt-5 justify-center">
-
-           <button className="btn btn-primary md:ml-5 mb-5" onClick={generateReply} disabled={!inputValue}>Get Result</button>
+           <div className="tooltip" data-tip="Generate new ideas">
+            <button className="btn btn-primary md:ml-5 mb-5" onClick={generateReply} disabled={!inputValue}>Generate Ideas</button>
+           </div>
+           <div className="tooltip" data-tip="Reset current input">
             <button className="btn btn-secondary md:ml-5 mb-5" onClick={resetUserMessage}>Reset input</button>
+            </div>
+            <div className="tooltip" data-tip="Reset current conversation with existing role">
+              <button className="btn btn-secondary md:ml-5 mb-5" onClick={resetConverationwithExistingRole}>Reset Conversation</button>
+            </div>
            </div>
            <div className="flex flex-col md:flex-row mt-5 justify-center">
+           <div className="tooltip" data-tip="Reset current conversation with no role">
             <button className="btn btn-primary mb-5" onClick={handleRefresh}>new converation</button>
+            </div>
             </div>
       </div>
     </div>
     <div className= {currentRole ? 'max-w-md ml-auto mr-auto' : 'hidden'}>
-        <div className="flex flex-row-reverse">
-          <button
-              className={!aiText ? 'hidden': 'btn btn-primary ml-2 btn-sm flex-end'}
-              onClick={() => {
-                  navigator.clipboard.writeText(aiText);
-                  setConverationCopyText("copied");
-              }}>
-              {conversationCopyText}
-          </button>
-        </div>
        <div className={showLoader ? "hidden" : "textarea"}>
         {
-          conversationList.length <= 2? [] : conversationList.slice(2).map((item, index) => ( <Fragment key={index}>
+          conversationList.length <= 2? [] : conversationList.slice(1).map((item, index) => ( <Fragment key={index}>
           <ChatDialog item = {item}></ChatDialog>
           </Fragment>))
         }
