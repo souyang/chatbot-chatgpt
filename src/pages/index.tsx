@@ -16,6 +16,8 @@ export default function Home() {
   const [hintDialog, setHintDialog] = useState("");
   const [showLoader, setShowLoader] = useState(false);
   const [copyText, setCopyText] = useState("copy");
+  const [conversationCopyText, setConverationCopyText] = useState("copy");
+  const aiText = conversationList.length > 2 ? conversationList[2].content : ""
   const handleInput = useCallback(
     (e: ChangeEvent<HTMLTextAreaElement>) => {
       setInputVaule(e.target.value)
@@ -42,6 +44,7 @@ export default function Home() {
   const generateReply = async () => { 
         const chatHistory: ChatCompletionRequestMessage[] = [...conversationList, {role: "user", content: inputValue}]
         console.log('chatHistory', chatHistory);
+        setShowLoader(true);
         const response = await fetch("/api/openAIChat", {
           method: "POST",
           headers: {
@@ -50,6 +53,7 @@ export default function Home() {
           body: JSON.stringify({ message: chatHistory}),
         })
         const data = await response.json()
+        setShowLoader(false);
         setInputVaule("")
         setConverstationList([...chatHistory, {role: "assistant", content: data.result}]);
   }
@@ -71,10 +75,13 @@ export default function Home() {
       </div>
       <div className='flex flex-col items-center justify-center pt-20 text-center pr-10 pl-10'>
         
-        <h1 className='text-600'>{CHATBOT_NAME}</h1>
-          <div className="mt-5">
-            <select className="select w-full max-w-xs select-primary" ref={roleRef} onChange={handleRoleSelect} defaultValue={'DEFAULT'}>
-              <option disabled value="DEFAULT">Pick your favorite role</option>
+        <h1 className='text-600'>{CHATBOT_NAME}: Your reliable assistant</h1>
+          <div className="form-control w-full max-w-xs mt-5">
+            <label className="label">
+              <span className="label-text">Role Type</span>
+            </label>
+            <select className="select w-full max-w-xs select-primary" ref={roleRef} onChange={handleRoleSelect} value={currentRole}>
+              <option value="">Pick your favorite role</option>
               {roles.map((role) => (
                 <option key={role.id} value={role.id}>{role.id}</option>
               ))}
@@ -88,7 +95,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row  justify-center" >
             <textarea
             placeholder='Input here'
-            className= 'textarea textarea-bordered textarea-lg w-full max-w-xs'
+            className= 'textarea textarea-bordered textarea-md w-full max-w-md'
             value={inputValue}
             onChange={handleInput}
             ref={inputRef}
@@ -97,7 +104,7 @@ export default function Home() {
           </div>
            <div className="flex flex-col md:flex-row mt-5 justify-center">
 
-           <button className="btn btn-primary md:ml-5 mb-5" onClick={generateReply}>Get Result</button>
+           <button className="btn btn-primary md:ml-5 mb-5" onClick={generateReply} disabled={!inputValue}>Get Result</button>
             <button className="btn btn-secondary md:ml-5 mb-5" onClick={resetUserMessage}>Reset input</button>
            </div>
            <div className="flex flex-col md:flex-row mt-5 justify-center">
@@ -105,7 +112,17 @@ export default function Home() {
             </div>
       </div>
     </div>
-    <div className= {currentRole ? 'w-1/2 ml-auto mr-auto' : 'hidden'}>
+    <div className= {currentRole ? 'max-w-md ml-auto mr-auto' : 'hidden'}>
+        <div className="flex flex-row-reverse">
+          <button
+              className={!aiText ? 'hidden': 'btn btn-primary ml-2 btn-sm flex-end'}
+              onClick={() => {
+                  navigator.clipboard.writeText(aiText);
+                  setConverationCopyText("copied");
+              }}>
+              {conversationCopyText}
+          </button>
+        </div>
        <div className={showLoader ? "hidden" : "textarea"}>
         {
           conversationList.length <= 2? [] : conversationList.slice(2).map((item, index) => ( <Fragment key={index}>
@@ -114,12 +131,14 @@ export default function Home() {
         }
        </div>
        <div className={!showLoader ? "hidden" : "flex items-center justify-center space-x-2"}>
-          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
-        role="status">
-          <span
-          className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]"
-          >Loading...</span>
-          </div>
+       <div
+    className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+    role="status">
+    <span
+      className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]"
+      >Loading...</span
+    >
+  </div>
        </div>
     </div>
   </div>
