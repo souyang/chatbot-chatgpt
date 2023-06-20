@@ -22,14 +22,14 @@ type ChatDialogProp = {
                     <button
               className={!item.content ? 'hidden': 'btn btn-primary ml-2 btn-sm flex-end'}
               onClick={() => {
-                  navigator.clipboard.writeText(item.content);
+                  navigator.clipboard.writeText(item.content || "");
                   setCopied("copied");
               }}>
               {copied}
           </button>
                 </div>
                 <br />
-                <div className="text-neutral-50">{renderContent(item.content)}</div>
+                <div className="text-neutral-50">{renderContent(item.content || "")}</div>
             
           </div>
         </div>
@@ -38,7 +38,7 @@ type ChatDialogProp = {
             <div className='chat-bubble chat-bubble-primary'>
                 <strong className='badge badge primary mb-1'>{USER_NAME}</strong>
                 <br />
-                    <div>{renderContent(item.content)}</div>
+                    <div>{renderContent(item.content || "")}</div>
             </div>
         </div>)
       }

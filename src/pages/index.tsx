@@ -2,7 +2,7 @@ import ChatDialog from '@/components/ChatDialog';
 import ThemeToggle from '@/components/ThemeToggle'
 import { CHATBOT_NAME } from '@/constants';
 import type { ChatCompletionRequestMessage } from 'openai';
-import React, { cache, ChangeEvent, Fragment, KeyboardEvent, useCallback, useRef, useState } from 'react'
+import React, { ChangeEvent, Fragment, useCallback, useRef, useState } from 'react'
 import roles from "@/data/roleContext.json"
 import CopyToClipboard from '@/components/CopyToClipboard';
 
@@ -45,7 +45,7 @@ export default function Home() {
     },
     [],
   )
-  const generateReply = cache(async () => { 
+  const generateReply = async () => { 
         let chatHistory: ChatCompletionRequestMessage[] = [...conversationList, {role: "user", content: isFirstConveration ? roleContext + ' ' + inputValue : inputValue}]
         //console.log('chatHistory', chatHistory);
         setShowLoader(true);
@@ -76,10 +76,14 @@ export default function Home() {
         }
       }
       catch(error) {
+        if (error instanceof Error) {
         console.error('data', error.message);
         setErrorMessage(error.message);
+        } else {
+          setErrorMessage('error occured');
+        }
       }
-  })
+  }
   const handleRefresh = () => {
     setConverstationList([])
     setIsFirstConversation(true)
