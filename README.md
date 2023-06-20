@@ -1,15 +1,18 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## Summary
+This project aims as the demo on providing personalized advice to people using prompt enginering best practice and ChatGPT API.
+
+## Tech Stack
+- [x] **Frontend Framework**: NextJS
+- [x] **UI Framework**：Component library for Tailwind CSS
+- [x] **Deployment Platform**: Vercel
+- [x] **Third party API**: ChatGPT API (GPT 3.5)
 
 ## Getting Started
 
-First, run the development server:
+First, clone the project and run the development server:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+yarn && yarn dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
