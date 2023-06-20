@@ -2,7 +2,7 @@ import ChatDialog from '@/components/ChatDialog';
 import ThemeToggle from '@/components/ThemeToggle'
 import { CHATBOT_NAME } from '@/constants';
 import type { ChatCompletionRequestMessage } from 'openai';
-import React, { ChangeEvent, Fragment, KeyboardEvent, useCallback, useRef, useState } from 'react'
+import React, { cache, ChangeEvent, Fragment, KeyboardEvent, useCallback, useRef, useState } from 'react'
 import roles from "@/data/roleContext.json"
 import CopyToClipboard from '@/components/CopyToClipboard';
 
@@ -45,10 +45,11 @@ export default function Home() {
     },
     [],
   )
-  const generateReply = async () => { 
+  const generateReply = cache(async () => { 
         let chatHistory: ChatCompletionRequestMessage[] = [...conversationList, {role: "user", content: isFirstConveration ? roleContext + ' ' + inputValue : inputValue}]
         //console.log('chatHistory', chatHistory);
         setShowLoader(true);
+        try {
         const response = await fetch("/api/openAIChat", {
           method: "POST",
           headers: {
@@ -65,11 +66,20 @@ export default function Home() {
           chatHistory = [{role: "user", content: inputValue}, ...chatHistory.slice(1)]
           setConverstationList([...chatHistory, {role: "assistant", content: data.result}]);
         } else {
+          if (typeof response === 'string') {
+            setErrorMessage(response);
+          } else {
           const data = await response.json();
           console.log('data', data);
           setErrorMessage(data.result);
+          }
         }
-  }
+      }
+      catch(error) {
+        console.error('data', error.message);
+        setErrorMessage(error.message);
+      }
+  })
   const handleRefresh = () => {
     setConverstationList([])
     setIsFirstConversation(true)
@@ -146,7 +156,7 @@ export default function Home() {
       <div className="alert alert-error shadow-lg">
         <div>
           <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          <span>Error! Task failed successfully.</span>
+          <span>Error! OpenAI api failed, please contact the administrator.</span>
         </div>
     </div>
       </div>
