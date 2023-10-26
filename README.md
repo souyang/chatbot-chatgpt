@@ -9,11 +9,12 @@ This project aims as the demo on providing personalized advice to people using p
 
 ## Getting Started
 
-First, clone the project and run the development server:
+1. clone the project and run the development server:
 
 ```bash
-yarn && yarn dev
+git clone https://github.com/souyang/chatbot-chatgpt.git
 ```
+2. Create .env file 
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
